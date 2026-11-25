@@ -43,8 +43,8 @@ Net_Revenue, Discount_Pct, Is_Delayed, Is_Cancelled`).
 ```
 food-delivery-analytics/
 ├── data/
-│   ├── raw_data.csv                 # Raw, messy dataset (9,270 rows)
-│   ├── cleaned_data.csv             # Cleaned, analysis-ready dataset (9,000 rows)
+│   ├── raw_data.csv                 # Raw, messy dataset 
+│   ├── cleaned_data.csv             # Cleaned, analysis-ready dataset 
 │   ├── customers_lookup.csv         # Customer reference data used during generation
 │   └── restaurants_lookup.csv       # Restaurant reference data used during generation
 │
@@ -81,10 +81,10 @@ food-delivery-analytics/
 ```bash
 pip install -r requirements.txt
 
-python scripts/01_generate_raw.py     # -> data/raw_data.csv
-python scripts/02_clean_data.py       # -> data/cleaned_data.csv, reports/data_cleaning_log.txt
-python scripts/03_load_sql.py         # -> sql/food_delivery.db
-python scripts/04_visualize.py        # -> visualizations/charts/*.png
+python scripts/01_generate_raw.py     
+python scripts/02_clean_data.py       
+python scripts/03_load_sql.py        
+python scripts/04_visualize.py        
 
 # Full documented walkthrough (cleaning + EDA in one place):
 jupyter nbconvert --to notebook --execute --inplace notebooks/food_delivery_analysis.ipynb

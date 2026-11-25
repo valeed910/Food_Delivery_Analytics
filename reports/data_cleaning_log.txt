@@ -1,0 +1,19 @@
+Loaded raw dataset: 9270 rows, 23 columns
+1. Removed exact duplicate rows: 238 removed -> 9032 rows remain
+   Removed duplicate Order_IDs (keeping first): 32 removed -> 9000 rows remain
+2. Standardized City values: trimmed whitespace, title-cased, mapped aliases (Bombay->Mumbai, New Delhi->Delhi, Bangalore->Bengaluru)
+2b. Standardized Payment_Method values (COD -> Cash On Delivery, casing normalized)
+2c. Standardized Food_Category casing (title case)
+2d. Standardized Customer_Gender, Order_Status, Order_Type casing
+3. Parsed Order_Date from mixed formats (DD-MM-YYYY and YYYY/MM/DD) into datetime; 0 rows could not be parsed
+3b. Converted Order_Time strings to time objects
+3c. Derived calculated columns: Order_Year, Order_Month, Order_Month_Name, Order_Weekday, Order_Hour, Is_Weekend
+4. Enforced numeric dtype on: Customer_Age, Quantity, Price, Discount, Delivery_Fee, Total_Amount, Delivery_Time_Minutes, Customer_Rating, Distance_KM
+5. Flagged 45 invalid Customer_Age values (<10 or >90) and set to NaN
+5b. Corrected 27 negative Total_Amount values by taking absolute value
+6. Detected 184 Delivery_Time_Minutes outliers above IQR upper bound (56.0 min) — capped at upper bound
+7. Missing-value treatment complete: 3311 missing cells -> 889 missing cells remaining (remaining NaNs are Delivery_Time_Minutes/Customer_Rating for Cancelled orders, which is expected — cancelled orders are never delivered or rated)
+8. Added calculated columns: Gross_Amount, Net_Revenue, Discount_Pct, Is_Delayed (>45 min), Is_Cancelled
+9. Validated numerical fields: Quantity >= 1, Total_Amount >= 0, Rating within 1-5 — all passed
+
+Final cleaned dataset saved: 9000 rows, 34 columns -> data/cleaned_data.csv

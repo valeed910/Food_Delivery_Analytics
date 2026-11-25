@@ -1,0 +1,98 @@
+-- =========================================================
+-- DAX Measures — Food Delivery Analytics Power BI Dashboard
+-- Table name assumed: powerbi_dataset
+-- =========================================================
+
+Total Revenue =
+CALCULATE(
+    SUM(powerbi_dataset[Net_Revenue]),
+    powerbi_dataset[Order_Status] <> "Cancelled"
+)
+
+Total Orders = COUNTROWS(powerbi_dataset)
+
+Total Delivered Orders =
+CALCULATE(COUNTROWS(powerbi_dataset), powerbi_dataset[Order_Status] <> "Cancelled")
+
+Total Customers = DISTINCTCOUNT(powerbi_dataset[Customer_ID])
+
+Total Restaurants = DISTINCTCOUNT(powerbi_dataset[Restaurant_ID])
+
+Avg Order Value =
+DIVIDE([Total Revenue], [Total Delivered Orders])
+
+Avg Delivery Time =
+CALCULATE(
+    AVERAGE(powerbi_dataset[Delivery_Time_Minutes]),
+    powerbi_dataset[Order_Status] <> "Cancelled"
+)
+
+Avg Rating =
+CALCULATE(
+    AVERAGE(powerbi_dataset[Customer_Rating]),
+    powerbi_dataset[Order_Status] <> "Cancelled"
+)
+
+Cancelled Orders =
+CALCULATE(COUNTROWS(powerbi_dataset), powerbi_dataset[Order_Status] = "Cancelled")
+
+Cancellation Rate =
+DIVIDE([Cancelled Orders], [Total Orders])
+
+Delayed Orders =
+CALCULATE(
+    COUNTROWS(powerbi_dataset),
+    powerbi_dataset[Is_Delayed] = TRUE,
+    powerbi_dataset[Order_Status] <> "Cancelled"
+)
+
+Delayed Order % =
+DIVIDE([Delayed Orders], [Total Delivered Orders])
+
+Avg Orders per Customer =
+DIVIDE([Total Delivered Orders], [Total Customers])
+
+Avg Discount % =
+CALCULATE(AVERAGE(powerbi_dataset[Discount_Pct]), powerbi_dataset[Order_Status] <> "Cancelled")
+
+-- Month-over-Month revenue growth (requires DimDate relationship)
+Revenue MoM Growth % =
+VAR CurrentRev = [Total Revenue]
+VAR PrevMonthRev =
+    CALCULATE([Total Revenue], DATEADD(DimDate[Date], -1, MONTH))
+RETURN
+    DIVIDE(CurrentRev - PrevMonthRev, PrevMonthRev)
+
+-- Returning customers (customers with more than 1 delivered order)
+Returning Customers =
+VAR CustomerOrderCounts =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            FILTER(powerbi_dataset, powerbi_dataset[Order_Status] <> "Cancelled"),
+            powerbi_dataset[Customer_ID]
+        ),
+        "OrderCount",
+        CALCULATE(COUNTROWS(powerbi_dataset))
+    )
+RETURN
+    COUNTROWS(FILTER(CustomerOrderCounts, [OrderCount] > 1))
+
+New Customers = [Total Customers] - [Returning Customers]
+
+-- Top 20% customer revenue share (for the loyalty-tier recommendation)
+Top20Pct Customer Revenue Share =
+VAR CustRevTable =
+    ADDCOLUMNS(
+        SUMMARIZE(
+            FILTER(powerbi_dataset, powerbi_dataset[Order_Status] <> "Cancelled"),
+            powerbi_dataset[Customer_ID]
+        ),
+        "CustRev", CALCULATE([Total Revenue])
+    )
+VAR RankedTable = ADDCOLUMNS(CustRevTable, "Rank", RANKX(CustRevTable, [CustRev]))
+VAR CustCount = COUNTROWS(CustRevTable)
+VAR Top20Count = ROUNDUP(CustCount * 0.2, 0)
+VAR Top20Revenue =
+    SUMX(FILTER(RankedTable, [Rank] <= Top20Count), [CustRev])
+RETURN
+    DIVIDE(Top20Revenue, [Total Revenue])

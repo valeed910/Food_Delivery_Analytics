@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated data / databases
+data/*.csv
+sql/*.db
+*.db
+
+# Power BI binary
+powerbi/*.pbix
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.ipynb_checkpoints/
+
+# Kilo / local
+.kilo/
